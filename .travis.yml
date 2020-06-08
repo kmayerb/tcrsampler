@@ -1,0 +1,19 @@
+language: python
+python:
+  - "3.6"
+jobs:
+  include:
+    - name: "pandas 1.0.3"
+      env: PANDAS_VERSION=1.0.3
+    - name: "pandas 0.24.2"
+      env: PANDAS_VERSION=0.24.2
+install:
+  - travis_retry pip install -r requirements.txt
+  - pip install -q pandas==$PANDAS_VERSION
+  - pip install pytest-cov
+  - pip install coveralls
+script:
+  - pytest
+  - pytest --cov=tcrsampler/
+after_success:
+  - coveralls

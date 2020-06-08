@@ -287,24 +287,3 @@ class TCRsampler():
 
 		ndf = ndf.sample(ndf.shape[0]).reset_index(drop = True)
 		return ndf[['v_reps','j_reps','cdr3']]
-
-
-
-
-
-		 			
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
