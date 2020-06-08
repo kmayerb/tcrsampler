@@ -3,6 +3,8 @@
 Sample TCRs according to VDJ gene usage frequency
 
 [![Build Status](https://travis-ci.com/kmayerb/tcrsampler.svg?branch=master)](https://travis-ci.com/kmayerb/tcrsampler)
+[![Coverage Status](https://coveralls.io/repos/github/kmayerb/tcrsampler/badge.svg?branch=master)](https://coveralls.io/github/kmayerb/tcrsampler?branch=master)
+[![PyPI version](https://badge.fury.io/py/tcrsampler.svg)](https://badge.fury.io/py/tcrsampler)
 
 ## Install 
 
