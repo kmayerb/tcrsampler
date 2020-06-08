@@ -21,9 +21,26 @@ python -c "from tcrsampler.setup_db import install_all_next_gen; install_all_nex
 ### Example
 
 ```python
+import os
+import pandas as pd
 from tcrsampler.sampler import TCRsampler
-t = TCRsampler(organism = 'human',db_file = 'alphabeta_db.tsv', ref_file= 'new_nextgen_chains_human_B.tsv')
-t.make_ref_dict(max_sample = 100)
-t.sample_ref_dict('TRBV1*01', 'TRBJ1-1*01',1)
-t.sample([['TRBV1*01', 'TRBJ1-1*01',1], ['TRBV2*01', 'TRBJ1-1*01',1]])
+t = TCRsampler()
+fn= os.path.join('tcrsampler' ,'tests', 'pmbc_mixcr_example_data.txt')
+t.clean_mixcr(filename = fn)
+t.build_background()
+t.sample([['TRBV9*01','TRBJ2-7*01', 2],['TRBV7-7*01', 'TRBJ2-4*01', 4] ], depth = 1)
 ```
+
+```
+[['CASSRTGSLADEQYF', 'CASSATGVVSAQYF'],
+ ['CASSLGQAARGIQYF', 'CASSLGQAARGIQYF', 'CASSLGQAARGIQYF', 'CASSLGQAARGIQYF']]
+```
+
+```python
+r = t.sample([['TRBV9*01','TRBJ2-7*01', 2],depth = 2)
+```
+
+```
+[['CASSRTGSLADEQYF', 'CASSATGVVSAQYF', 'CASSAWGQVYEQYF', 'CASSVSGSPYEQYF']]
+```
+
