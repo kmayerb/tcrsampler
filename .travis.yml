@@ -13,7 +13,7 @@ install:
   - pip install pytest-cov
   - pip install coveralls
 script:
-  - pytest
+  - python -c "from tcrsampler.setup_db import install_all_next_gen; install_all_next_gen(dry_run = False)"
   - pytest --cov=tcrsampler/
 after_success:
   - coveralls
