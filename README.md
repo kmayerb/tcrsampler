@@ -30,7 +30,7 @@ t.sample([['TRBV9*01','TRBJ2-7*01', 2],['TRBV7-7*01', 'TRBJ2-4*01', 4] ], depth 
  ['CASSLGQAARGIQYF', 'CASSLGQAARGIQYF', 'CASSLGQAARGIQYF', 'CASSLGQAARGIQYF']]
 ```
 
-### Increase depth of sampling
+### Change depth of sampling
 
 ```python
 r = t.sample([['TRBV9*01','TRBJ2-7*01', 2],depth = 2)
@@ -41,7 +41,7 @@ r = t.sample([['TRBV9*01','TRBJ2-7*01', 2],depth = 2)
 ```
 
 
-### Change seed.
+### Change seed
 
 ```python
 t.sample([['TRBV9*01','TRBJ2-7*01', 2]], depth = 2, seed = 5)
