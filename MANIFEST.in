@@ -1,1 +1,1 @@
-include tcrsampler/db/*.tsv
+include tcrsampler/db/*_db.tsv

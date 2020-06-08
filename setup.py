@@ -17,9 +17,9 @@ opts = dict(name='tcrsampler',
             license='MIT',
             author='Koshlan Mayer-Blackwell',
             author_email='kmayerbl@fredhutch.org',
-            version='0.1.0',
-            packages=PACKAGES
-           )
+            version='0.1.1',
+            packages=PACKAGES,
+            include_package_data=True)
 
 install_reqs = [
       'numpy>=1.18.1',
