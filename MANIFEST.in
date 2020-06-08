@@ -1,1 +1,2 @@
 include tcrsampler/db/*_db.tsv
+include tcrsampler/tests/pmbc_mixcr_example_data.txt

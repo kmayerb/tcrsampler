@@ -12,12 +12,6 @@ Sample TCRs according to VDJ gene usage frequency
 pip install tcrsampler
 ```
 
-Install default reference files:
-
-```
-python -c "from tcrsampler.setup_db import install_all_next_gen; install_all_next_gen(dry_run = False)"
-```
-
 ### Example
 
 ```python
@@ -36,6 +30,8 @@ t.sample([['TRBV9*01','TRBJ2-7*01', 2],['TRBV7-7*01', 'TRBJ2-4*01', 4] ], depth 
  ['CASSLGQAARGIQYF', 'CASSLGQAARGIQYF', 'CASSLGQAARGIQYF', 'CASSLGQAARGIQYF']]
 ```
 
+### Increase depth of sampling
+
 ```python
 r = t.sample([['TRBV9*01','TRBJ2-7*01', 2],depth = 2)
 ```
@@ -44,3 +40,21 @@ r = t.sample([['TRBV9*01','TRBJ2-7*01', 2],depth = 2)
 [['CASSRTGSLADEQYF', 'CASSATGVVSAQYF', 'CASSAWGQVYEQYF', 'CASSVSGSPYEQYF']]
 ```
 
+
+### Change seed.
+
+```python
+t.sample([['TRBV9*01','TRBJ2-7*01', 2]], depth = 2, seed = 5)
+```
+
+```
+[['CASRWGEQYF', 'CASSVAEGGPYEQYF', 'CASRWGEQYF', 'CASSSRTSPSYEQYF']]
+```
+
+```python
+t.sample([['TRBV9*01','TRBJ2-7*01', 2]], depth = 2, seed = 10)
+```
+
+```
+[['CASSTGTTSYEQYF', 'CASSAWGQVYEQYF', 'CASNPGGRAYEQYF', 'CASSVSGGSYEQYF']]
+```
