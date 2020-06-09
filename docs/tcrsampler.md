@@ -19,7 +19,7 @@ pip install tcrsampler
 
 The files are:
 
-* **britanova_chord_blood.csv** (80 MB) - It contains beta-chain repertoires from 8 ubilical cord samples [download](https://www.dropbox.com/s/rkbce72njcei4y8/britanova_chord_blood.csv?dl=1)
+* **britanova_chord_blood.csv** (80 MB) - It contains beta-chain repertoires from 8 umbilical cord samples [download](https://www.dropbox.com/s/rkbce72njcei4y8/britanova_chord_blood.csv?dl=1)
 
 * **emerson_cmv_negative.csv** (120 MB) - It contains beta-chain repertoires from 7 CMV negative individuals aged 18-21 [download](https://www.dropbox.com/s/yrozbowxtqumjfl/emerson_cmv_negative.csv?dl=1).
 
