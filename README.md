@@ -21,8 +21,8 @@ from tcrsampler.sampler import TCRsampler
 t = TCRsampler()
 fn= os.path.join('tcrsampler' ,'tests', 'pmbc_mixcr_example_data.txt')
 t.clean_mixcr(filename = fn)
-t.build_background()
-t.sample([['TRBV9*01','TRBJ2-7*01', 2],['TRBV7-7*01', 'TRBJ2-4*01', 4] ], depth = 1)
+t.build_background(stratify_by_subject = True, use_frequency = True)
+t.sample([['TRBV9*01','TRBJ2-7*01', 2],['TRBV7-7*01', 'TRBJ2-4*01', 4] ], depth = 1, use_frequency = True)
 ```
 
 ```
@@ -33,13 +33,12 @@ t.sample([['TRBV9*01','TRBJ2-7*01', 2],['TRBV7-7*01', 'TRBJ2-4*01', 4] ], depth 
 ### Change depth of sampling
 
 ```python
-r = t.sample([['TRBV9*01','TRBJ2-7*01', 2],depth = 2)
+r = t.sample([['TRBV9*01','TRBJ2-7*01', 2]],depth = 2)
 ```
 
 ```
 [['CASSRTGSLADEQYF', 'CASSATGVVSAQYF', 'CASSAWGQVYEQYF', 'CASSVSGSPYEQYF']]
 ```
-
 
 ### Change seed
 
