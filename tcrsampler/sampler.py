@@ -8,6 +8,22 @@ import time
 from progress.bar import IncrementalBar
 
 class TCRsampler():
+  """ 
+  Class for sampling CDR3s based on specified v-gene and j-gene usage.
+
+  Attributes
+  ----------
+  ref_df : pd.DataFrame
+    Dataframe of reference CDR$, but contain columns ['v_reps','j_reps','cdr3', 'count','freq']
+
+  ref_dict : dict
+    dictionary keyed on tuples that point to dataframe of CDR3s
+
+  Notes
+  -----
+  The goal of tcrsampler is to allow representative CDR3s to be sampled from a background set. By default, the likelihood that a CDR3 is drawn from the background is proportional to the frequency of that
+  CDR3 clone in the original sample. That is, more abundant clones will be sampled more frequently than less abundant clones. 
+  """
   def __init__(self):
     self.ref_df = None
     self.ref_dict = None
@@ -82,7 +98,7 @@ class TCRsampler():
     bar.finish()
     self.ref_df = df
 
-  def build_background(self, df = None, max_rows = 100, stratify_by_subject = False, use_frequency= True):
+  def build_background(self, df = None, max_rows = 100, stratify_by_subject = False, use_frequency= True, make_singleton = False):
     """
     Parameters
     ----------
@@ -90,11 +106,13 @@ class TCRsampler():
       DataFrame with ['v_reps','j_reps','cdr3', 'count','freq'] columns
     max_rows : int
       Maximum clones per v,j pair (per subject)  
-    stratify_by_subject : boool
+    stratify_by_subject : bool
       If True, max_rows will apply to v,j,subject. If False, max_rows applies to v,j
     use_frequency : bool
       If True, uses frequency for ranking rows. If False, uses raw counts. 
-
+    make_singleton : bool
+      If True, background is still sorted by frequency or counts, but final fequency and counts values are overridden
+      and set to 1. 
     Assigns
     -------
     self.ref_dict : dict
@@ -139,6 +157,12 @@ class TCRsampler():
               dii = ggroup.sort_values([col], ascending = False).reset_index(drop = True).iloc[0:n,].copy()
               d[i] = pd.concat([d[i],dii])
     bar.finish()
+    
+    if make_singleton:
+      for k,v in d.items():
+        v['count'] = 1
+        v['freq']  = 1
+
     self.ref_dict = d
 
   def sample_background(self,v,j,n=1, d= None, depth = 1, seed =1, use_frequency= True ):

@@ -21,6 +21,14 @@ def test_TCRsampler_build():
 	assert isinstance(t.ref_dict, dict)
 	assert isinstance(t.ref_dict.popitem()[1], pd.DataFrame)
 
+def test_TCRsampler_build_singleton():
+	t = TCRsampler()
+	fn= os.path.join('tcrsampler' ,'tests', 'pmbc_mixcr_example_data.txt')
+	t.clean_mixcr(filename = fn)
+	t.build_background(stratify_by_subject = True, make_singleton = True)
+	r = t.sample_background('TRBV9*01','TRBJ2-7*01', n =10 )
+
+
 def test_TCRsampler_build_stratified():
     t = TCRsampler()
     fn= os.path.join('tcrsampler' ,'tests', 'pmbc_mixcr_example_data.txt')
