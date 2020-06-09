@@ -14,6 +14,17 @@ class TCRsampler():
 
   def _valid_cdr3(self, cdr3):
     """
+    Return True only if CDR3 is comprised of valid upper case amino acid letters.
+
+    Parameters
+    ----------
+    cdr3 : str
+      string repressenting amino acid sequence
+
+    Returns
+    -------
+    valid : bool
+
     Examples
     --------
     >>> _valid_cdr3("AAAA")
@@ -26,15 +37,32 @@ class TCRsampler():
     return valid
 
   def clean_mixcr(self, filename):
+    """
+    Parameters
+    ----------
+    filenname : str
+      name of mixcr standard output flat .tsv
+
+    Assigns
+    -------
+    self.ref_df : pd.DataFrame  
+      DataFarme with columns ['v_reps','j_reps','cdr3', 'count']
+    """
 
     bar = IncrementalBar('Clean Mixcr     ', max = 1, suffix='%(percent)d%%')
     df = pd.read_csv(filename, sep = "\t")
     
-    select_these_columns = ['bestVGene','bestJGene', 'aaSeqCDR3','cloneCount']
-    rename_these_columns = {'bestVGene':'v_reps',
-                'bestJGene':'j_reps', 
-                'aaSeqCDR3':'cdr3',
-                'cloneCount':'count'}
+    if 'subject' in df.columns:
+      select_these_columns = ['bestVGene','bestJGene', 'aaSeqCDR3','cloneCount', 'cloneFraction','subject']
+    else:
+      select_these_columns = ['bestVGene','bestJGene', 'aaSeqCDR3','cloneCount', 'cloneFraction']
+    
+    rename_these_columns = {'subject':'subject',
+                            'bestVGene':'v_reps',
+                            'bestJGene':'j_reps', 
+                            'aaSeqCDR3':'cdr3',
+                            'cloneCount':'count',
+                            'cloneFraction':'freq'}
 
     df.rename(columns =rename_these_columns, inplace = True)
     df['v_reps'] = df['v_reps'].apply(lambda x: f"{x}*01")
@@ -46,20 +74,26 @@ class TCRsampler():
     ind = df['cdr3'].apply(lambda x: self._valid_cdr3(cdr3= x))
     df = df[ind]
     df = df[rename_these_columns.values()]
-    df = df[['v_reps','j_reps','cdr3', 'count']].copy().reset_index(drop = True)
+    if 'subject' in df.columns:
+      df = df[['v_reps','j_reps','cdr3', 'count','freq','subject']].copy().reset_index(drop = True)
+    else:
+      df = df[['v_reps','j_reps','cdr3', 'count','freq']].copy().reset_index(drop = True)
     bar.next()
     bar.finish()
     self.ref_df = df
 
-  def clean_reps_format():
-    pass
-
-
-  def build_background(self, df = None, max_rows = 100):
+  def build_background(self, df = None, max_rows = 100, stratify_by_subject = False, use_frequency= True):
     """
     Parameters
     ----------
-    d: dict 
+    df : pd.DataFrame
+      DataFrame with ['v_reps','j_reps','cdr3', 'count','freq'] columns
+    max_rows : int
+      Maximum clones per v,j pair (per subject)  
+    stratify_by_subject : boool
+      If True, max_rows will apply to v,j,subject. If False, max_rows applies to v,j
+    use_frequency : bool
+      If True, uses frequency for ranking rows. If False, uses raw counts. 
 
     Assigns
     -------
@@ -68,35 +102,80 @@ class TCRsampler():
     """
     if df is None:
       df = self.ref_df
-    dfg =df.groupby(['v_reps','j_reps'])
-    d = dict()
-    bar = IncrementalBar('Build Background', max = dfg.ngroups, suffix='%(percent)d%%')
-    for i,group in dfg:
-      bar.next()
-      if group.shape[0] > 0:
-        if group.shape[0] > max_rows:
-          n = max_rows
-        else:
-          n = group.shape[0]
-        d[i] =group.sort_values(['count'], ascending = False).reset_index(drop = True).iloc[0:n,].copy()
 
+    if use_frequency:
+      col = 'freq'
+    else:
+      col = 'count'
+
+    dfg =df.groupby(['v_reps','j_reps'])
+    
+    bar = IncrementalBar('Build Background', max = dfg.ngroups, suffix='%(percent)d%%')
+    
+    d = dict()
+    
+    for i,group in dfg:
+    
+      bar.next()
+      # CASE:  stratify_by_subject = False
+      if not stratify_by_subject:
+        if group.shape[0] > 0:
+          if group.shape[0] > max_rows:
+            n = max_rows
+          else:
+            n = group.shape[0]
+          d[i] =group.sort_values([col], ascending = False).reset_index(drop = True).iloc[0:n,].copy()
+      else: # CASE:  stratify_by_subject = True, another nested groupby, and max_rows applies to subject
+        dfgg = group.groupby(['subject'])
+        for ii , ggroup in dfgg:
+          if ggroup.shape[0] > 0:
+            if ggroup.shape[0] > max_rows:
+              n = max_rows
+            else:
+              n = ggroup.shape[0]
+            if i not in d.keys():
+              d[i] = ggroup.sort_values([col], ascending = False).reset_index(drop = True).iloc[0:n,].copy()
+            else: 
+              dii = ggroup.sort_values([col], ascending = False).reset_index(drop = True).iloc[0:n,].copy()
+              d[i] = pd.concat([d[i],dii])
     bar.finish()
     self.ref_dict = d
 
-  def sample_background(self,v,j,n=1, d= None, depth = 1, seed =1):
+  def sample_background(self,v,j,n=1, d= None, depth = 1, seed =1, use_frequency= True ):
     """
     Parameters
     ----------
-    d: dict 
-      defaults to self.ref_dict
+    v : str
+      v-gene name e.g., 'TRBV10-1*01'
+    j : str
+      j-gene name e.g., 'TRBJ1-1*01'
+    n : int
+      number of cdr3 samples to draw for given v,j
+    d : dict 
+      Dictionary for sampling, generated in by .build_background
+    depth : 
+
+    seed : int
+      random number generating seed
+    use_frequency : bool
+      If True, uses frequency for sampling proportionaly. If False, uses raw counts. 
 
     Returns
     -------
-  
+    r: list
 
+    Example 
+    -------
+    >>> sample_background(v ='TRBV10-1*01', j ='TRBJ1-1*01',n=1, d= None, depth = 1, seed =1, use_frequency= True )
     """
     if d is None:
       d = self.ref_dict
+
+
+    if use_frequency:
+      col = 'freq'
+    else:
+      col = 'count'
     
     assert isinstance(v, str)
     assert isinstance(j, str)
@@ -108,7 +187,7 @@ class TCRsampler():
       subdf = d[(v,j)]
   
       selection_probability = \
-        subdf['count'] / np.sum(subdf['count'])
+        subdf[ col ] / np.sum(subdf[ col ])
 
       np.random.seed(seed) 
       
@@ -117,15 +196,19 @@ class TCRsampler():
         size = n * depth,
         p=selection_probability)
 
-      return subdf.iloc[probabalistic_selection_index,]['cdr3'].to_list()
+      r = subdf.iloc[probabalistic_selection_index,]['cdr3'].to_list()
+      return r
 
     except KeyError:
       warnings.warn(f"({v},{j} gene usage not available")
-      return [None]
+      r = [None]
+      return r
 
 
-  def sample(self, v_j_usage, depth = 1, seed = 1, flatten = False):
+  def sample(self, v_j_usage, depth = 1, seed = 1, flatten = False, use_frequency= True):
     """
+    Sample a reference dictionary based on v and j gene usage 
+
     Parameters
     ----------
     v_j_usage : list of lists or list of tuples (v-gene. j-gene, n)
@@ -136,6 +219,11 @@ class TCRsampler():
       random number initialization
     flatten : bool
       if true return a single list, if false a list of lists 
+    
+    Returns 
+    -------
+    result : list
+      list of lists if flatten is False, list if flatten is True 
 
     Example
     -------
@@ -147,15 +235,11 @@ class TCRsampler():
 
     result = list()
     for v,j,n in v_j_usage:
-      r = self.sample_background(v = v, j = j, n = n, depth = depth, seed = seed)
+      r = self.sample_background(v = v, j = j, n = n, depth = depth, seed = seed, use_frequency= use_frequency)
       result.append(r)
 
     if flatten:
       result = list(np.concatenate(result))
 
     return result
-
-
-
-
 
