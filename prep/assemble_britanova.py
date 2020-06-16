@@ -27,7 +27,10 @@ def assemble_britanova_chord_blood(
 		df['subject'] = os.path.basename(fx)
 		l.append(df)
 	bar.next();bar.finish()
+	del df
+	df = pd.concat(l)
 	del l
+
 	def _valid_cdr3(cdr3):
 		amino_acids = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
 		valid = np.all([aa in amino_acids for aa in cdr3])
