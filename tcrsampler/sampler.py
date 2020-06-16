@@ -19,6 +19,10 @@ class TCRsampler():
   ref_dict : dict
     dictionary keyed on tuples that point to dataframe of CDR3s
 
+  vj_freq : dict
+
+  vj_occur_freq : dict
+
   Notes
   -----
   The goal of tcrsampler is to allow representative CDR3s to be sampled from a background set. By default, the likelihood that a CDR3 is drawn from the background is proportional to the frequency of that
@@ -127,13 +131,90 @@ class TCRsampler():
       col = 'count'
 
     dfg =df.groupby(['v_reps','j_reps'])
+
+    #bar = IncrementalBar('Build Background', max = dfg.ngroups, suffix='%(percent)d%%')
     
-    bar = IncrementalBar('Build Background', max = dfg.ngroups, suffix='%(percent)d%%')
-    
+    bar = IncrementalBar('V-J Frequency Dict ', max = 3, suffix='%(percent)d%%')
+    # V_J OCCURRENCE PROBABILITIES BY THE SEQUENCE FREQUENCY METHOD
+      # By this method, all seqs are considered and probability of a v_j pairing
+      # is assumed to be proportional to frequency of seqs. This method has 
+      # the benefit of using all the data, but it will be influenced by clonal expansions.
+    vj = dfg['freq'].sum().reset_index()
+    assert np.divide(vj.freq,vj.freq.sum()).sum() == 1
+    # Divide frequency by sum of total frequncy across all subjects, assumes most subject frequency columns sum roughly to 1
+    bar.next()
+    vj = vj.assign(freq = np.divide(vj.freq,vj.freq.sum()))
+    assert np.isclose(vj.freq.sum(), 1.0, rtol = 0.000001)
+    # Assign a tuple key_dictionary to < .vj_freq >
+    self.vj_freq = {(v,j):f for v,j,f in vj.to_dict('split')['data']}
+    bar.next()
+    # Calculate the marginal V-gene frequencies
+    dfg = df.groupby(['v_reps'])
+    v_only = dfg['freq'].sum().reset_index()
+    v_only = v_only.assign(freq = np.divide(v_only.freq, v_only.freq.sum()))
+    self.v_freq = {v:f for v,f in v_only.to_dict('split')['data']}
+          # TEST THAT assert np.isclose(np.sum([k for _,k in t.v_freq.items()]), 1.0)
+    # Calculate the marginal J-gene frequencies
+    dfg = df.groupby(['j_reps'])
+    j_only = dfg['freq'].sum().reset_index()
+    j_only = j_only.assign(freq = np.divide(j_only.freq, j_only.freq.sum()))
+    self.j_freq = {j:f for j,f in j_only.to_dict('split')['data']}
+          
+    bar.next();bar.finish()
+
+    # V_J OCCURRENCE PROBABILITIES BY THE UNIQUE N CLONES METHOD
+      # By this method, we take the top N clones from each subject and 
+      # V,J pairing probability is assumed to be proportional to frequncy of unique 
+      # clones. This method has a disadvantage that we only conider the number of 
+      # clones per sample equal to that in the least diverse sample; 
+      # however this method is not biased by clonal expansion.
+    bar = IncrementalBar('V-J Occurrence Dict', max = 3, suffix='%(percent)d%%')
+    df_gb_sub = df.\
+      sort_values(['freq','subject'], ascending = False).\
+      groupby(['subject'])
+      # Count # of clone per subject.
+    nclone_per_subject = [group.shape[0] for _,group in df_gb_sub]
+      # Set N to be the number of clones in the subject with the fewest clones
+    N = np.min(nclone_per_subject )
+      # Take only the top N from each subject, and count how often these occured
+      # (note thate we ignore the frequency which reflects clonal expansion)
+    bar.next()
+    vj_occur = df_gb_sub.head(N).groupby(['v_reps', 'j_reps']).\
+      size().\
+      reset_index().\
+      rename(columns = {0:'occur'})
+    vj_occur = vj_occur.assign(occur = np.divide(vj_occur.occur, vj_occur.occur.sum()))
+    assert np.isclose(vj_occur.occur.sum(), 1.0, rtol = 0.000001)
+    self.vj_occur_freq = {(v,j):f for v,j,f in vj_occur.to_dict('split')['data']}
+
+    bar.next()
+    # Calculate the marginal V-gene frequencies
+    v_occur = df_gb_sub.head(N).groupby(['v_reps']).\
+      size().\
+      reset_index().\
+      rename(columns = {0:'occur'})
+    v_occur = v_occur.assign(occur = np.divide(v_occur.occur, v_occur.occur.sum()))
+    assert np.isclose(vj_occur.occur.sum(), 1.0, rtol = 0.000001)
+    self.v_occur_freq = {v:f for v,f in v_occur.to_dict('split')['data']}
+      # TEST THAT np.isclose(np.sum([k for _,k in t.v_occur_freq.items()]), 1.0)
+    # Calculate the marginal J-gene frequencies
+    j_occur = df_gb_sub.head(N).groupby(['j_reps']).\
+      size().\
+      reset_index().\
+      rename(columns = {0:'occur'})
+    j_occur = j_occur.assign(occur = np.divide(j_occur.occur, j_occur.occur.sum()))
+    assert np.isclose(j_occur.occur.sum(), 1.0, rtol = 0.000001)
+    self.j_occur_freq = {j:f for j,f in j_occur.to_dict('split')['data']}
+      # TEST THAT np.isclose(np.sum([k for _,k in t.j_occur_freq.items()]), 1.0)
+    bar.next();bar.finish()
+
+
+    dfg =df.groupby(['v_reps','j_reps'])
+    bar = IncrementalBar('Build Background   ', max = dfg.ngroups, suffix='%(percent)d%%')
     d = dict()
-    
+
     for i,group in dfg:
-    
+  
       bar.next()
       # CASE:  stratify_by_subject = False
       if not stratify_by_subject:

@@ -2,7 +2,7 @@ import pytest
 import os
 import pandas as pd
 from tcrsampler.sampler import TCRsampler
-
+import numpy as np
 
 def test_TCRsampler_init():
 	t = TCRsampler()
@@ -21,6 +21,18 @@ def test_TCRsampler_build():
 	assert isinstance(t.ref_dict, dict)
 	assert isinstance(t.ref_dict.popitem()[1], pd.DataFrame)
 
+def test_TCRsampler_build_vj_components():
+	t = TCRsampler()
+	fn= os.path.join('tcrsampler' ,'tests', 'pmbc_mixcr_example_data.txt')
+	t.clean_mixcr(filename = fn)
+	t.build_background()
+	assert np.isclose(np.sum([k for _,k in t.vj_freq.items()]), 1.0)
+	assert np.isclose(np.sum([k for _,k in t.j_freq.items()]), 1.0)
+	assert np.isclose(np.sum([k for _,k in t.v_freq.items()]), 1.0)
+	assert np.isclose(np.sum([k for _,k in t.vj_occur_freq.items()]), 1.0)
+	assert np.isclose(np.sum([k for _,k in t.v_occur_freq.items()]), 1.0)
+	assert np.isclose(np.sum([k for _,k in t.j_occur_freq.items()]), 1.0)
+	
 def test_TCRsampler_build_singleton():
 	t = TCRsampler()
 	fn= os.path.join('tcrsampler' ,'tests', 'pmbc_mixcr_example_data.txt')
@@ -30,11 +42,11 @@ def test_TCRsampler_build_singleton():
 
 
 def test_TCRsampler_build_stratified():
-    t = TCRsampler()
-    fn= os.path.join('tcrsampler' ,'tests', 'pmbc_mixcr_example_data.txt')
-    t.clean_mixcr(filename = fn)
-    t.build_background(stratify_by_subject = True)
-    r = t.sample_background('TRBV9*01','TRBJ2-7*01', n =10 )
+	t = TCRsampler()
+	fn= os.path.join('tcrsampler' ,'tests', 'pmbc_mixcr_example_data.txt')
+	t.clean_mixcr(filename = fn)
+	t.build_background(stratify_by_subject = True)
+	r = t.sample_background('TRBV9*01','TRBJ2-7*01', n =10 )
 
 
 def test_prob_sampler_sample_background():
