@@ -10,14 +10,14 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 opts = dict(name='tcrsampler',
             maintainer='Koshlan Mayer-Blackwell',
             maintainer_email='kmayerbl@fredhutch.org',
-            description='Sample TCRs according to VDJ gene usage frequency',
+            description='Sample TCRs according to VJ gene usage frequency',
             long_description=long_description,
             long_description_content_type='text/markdown',
             url='https://github.com/kmayerb/tcrsampler',
             license='MIT',
             author='Koshlan Mayer-Blackwell',
             author_email='kmayerbl@fredhutch.org',
-            version='0.1.3',
+            version='0.1.4',
             packages=PACKAGES,
             include_package_data=True)
 
