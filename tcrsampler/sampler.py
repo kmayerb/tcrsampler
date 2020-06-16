@@ -20,13 +20,39 @@ class TCRsampler():
     dictionary keyed on tuples that point to dataframe of CDR3s
 
   vj_freq : dict
-
+    dictionary keyed on  V,J gene name tuples pointing to frequency of V,J-gene pairings by FREQUENCY METHOD
+  v_freq : dict
+    dictionary keyed on  V gene name pointing to frequency of V-gene pairings by FREQUENCY METHOD
+  j_freq : dict
+    dictionary keyed on  J gene name pointing to frequency of J-gene pairings by FREQUENCY METHOD
   vj_occur_freq : dict
+    dictionary keyed on tuples pointing to frequency of v,j pairings by OCCURRENCE METHOD
+  v_occur_freq : dict
+    dictionary keyed on  V gene name pointing to frequency of V-gene pairings by OCCURRENCE METHOD 
+  j_occur_freq : dict 
+    dictionary keyed on  J gene name pointing to frequency of J-gene pairings by OCCURRENCE METHOD 
 
   Notes
   -----
   The goal of tcrsampler is to allow representative CDR3s to be sampled from a background set. By default, the likelihood that a CDR3 is drawn from the background is proportional to the frequency of that
   CDR3 clone in the original sample. That is, more abundant clones will be sampled more frequently than less abundant clones. 
+  
+  FREQUENCY METHOD: V_J OCCURRENCE PROBABILITIES BY THE SEQUENCE FREQUENCY METHOD
+  By this method, all seqs in the input are considered and probability of a V,J pairing
+  is assumed to be proportional to frequency of V,J-derived sequences in the sample. This method has 
+  the benefit of using all the data, but it is influenced by clonal expansions.
+
+  OCCURRENCE METHOD: V_J OCCURRENCE PROBABILITIES BY THE UNIQUE N CLONES METHOD
+  By this method, we take the top N clones from each subject and 
+  V,J pairing probability is assumed to be proportional to frequncy of unique 
+  clones. This method has a disadvantage that we only consider the number of 
+  clones per sample equal to that in the least diverse sample; 
+  however this method is not biased by clonal expansion.
+
+  N is currently determined by taking the number of clones in the least diverse subject 
+  (i.e., the subject with the fewest clones). In this case the ~102,000 clones are considered 
+  from each sample. 
+
   """
   def __init__(self):
     self.ref_df = None
@@ -102,7 +128,12 @@ class TCRsampler():
     bar.finish()
     self.ref_df = df
 
-  def build_background(self, df = None, max_rows = 100, stratify_by_subject = False, use_frequency= True, make_singleton = False):
+  def build_background( self, 
+                        df = None, 
+                        max_rows = 100, 
+                        stratify_by_subject = False, 
+                        use_frequency= True, 
+                        make_singleton = False):
     """
     Parameters
     ----------
@@ -136,9 +167,6 @@ class TCRsampler():
     
     bar = IncrementalBar('V-J Frequency Dict ', max = 3, suffix='%(percent)d%%')
     # V_J OCCURRENCE PROBABILITIES BY THE SEQUENCE FREQUENCY METHOD
-      # By this method, all seqs are considered and probability of a v_j pairing
-      # is assumed to be proportional to frequency of seqs. This method has 
-      # the benefit of using all the data, but it will be influenced by clonal expansions.
     vj = dfg['freq'].sum().reset_index()
     assert np.divide(vj.freq,vj.freq.sum()).sum() == 1
     # Divide frequency by sum of total frequncy across all subjects, assumes most subject frequency columns sum roughly to 1
@@ -162,12 +190,7 @@ class TCRsampler():
           
     bar.next();bar.finish()
 
-    # V_J OCCURRENCE PROBABILITIES BY THE UNIQUE N CLONES METHOD
-      # By this method, we take the top N clones from each subject and 
-      # V,J pairing probability is assumed to be proportional to frequncy of unique 
-      # clones. This method has a disadvantage that we only conider the number of 
-      # clones per sample equal to that in the least diverse sample; 
-      # however this method is not biased by clonal expansion.
+    # V_J OCCURRENCE PROBABILITIES BY THE UNIQUE N CLONES METHOD (see NOTES)
     bar = IncrementalBar('V-J Occurrence Dict', max = 3, suffix='%(percent)d%%')
     df_gb_sub = df.\
       sort_values(['freq','subject'], ascending = False).\
