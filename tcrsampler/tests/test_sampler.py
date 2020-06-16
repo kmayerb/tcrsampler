@@ -89,4 +89,22 @@ def test_prob_sampler_sample_key_warn():
 		r = t.sample([['TRBV999*01','TRBJ2-7*01', 2]])
 	assert r == [[None]]
 
+def test_v_j_freq_estimates():
+	d = {'Unnamed: 0': {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}, 'v_reps': {0: 'TRBV24-1*01',  1: 'TRBV5-1*01',  2: 'TRBV7-2*01',  3: 'TRBV3-1*01',  4: 'TRBV7-3*01'}, 'j_reps': {0: 'TRBJ2-1*01',  1: 'TRBJ2-5*01',  2: 'TRBJ2-3*01',  3: 'TRBJ2-5*01',  4: 'TRBJ2-3*01'}, 'cdr3': {0: 'CATRQDNEQFF',  1: 'CASSLEETQYF',  2: 'CASSLADTQYF',  3: 'CASSQETQYF',  4: 'CASSLAGGTDTQYF'}, 'count': {0: 252, 1: 166, 2: 113, 3: 98, 4: 89}, 'freq': {0: 0.0003726818302818776,  1: 0.0002454967612174273,  2: 0.00016711526516608003,  3: 0.00014493182288739684,  4: 0.00013162175752018694}, 'subject': {0: 'A5-S11.txt',  1: 'A5-S11.txt',  2: 'A5-S11.txt',  3: 'A5-S11.txt',  4: 'A5-S11.txt'}}
+	df = pd.DataFrame(d)
+	t = TCRsampler()
+	t.ref_df = df
+	t.build_background()
+	assert  t.v_occur_freq == {  'TRBV3-1*01': 0.2,
+								 'TRBV5-1*01': 0.2,
+								 'TRBV7-2*01': 0.2,
+								 'TRBV7-3*01': 0.2,
+								 'TRBV24-1*01': 0.2}
+	assert t.j_occur_freq == {'TRBJ2-1*01': 0.2, 'TRBJ2-3*01': 0.4, 'TRBJ2-5*01': 0.4}
+
+								
+
+
+
+
 

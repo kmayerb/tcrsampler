@@ -168,11 +168,11 @@ class TCRsampler():
     bar = IncrementalBar('V-J Frequency Dict ', max = 3, suffix='%(percent)d%%')
     # V_J OCCURRENCE PROBABILITIES BY THE SEQUENCE FREQUENCY METHOD
     vj = dfg['freq'].sum().reset_index()
-    assert np.divide(vj.freq,vj.freq.sum()).sum() == 1
+
     # Divide frequency by sum of total frequncy across all subjects, assumes most subject frequency columns sum roughly to 1
     bar.next()
     vj = vj.assign(freq = np.divide(vj.freq,vj.freq.sum()))
-    assert np.isclose(vj.freq.sum(), 1.0, rtol = 0.000001)
+
     # Assign a tuple key_dictionary to < .vj_freq >
     self.vj_freq = {(v,j):f for v,j,f in vj.to_dict('split')['data']}
     bar.next()
@@ -219,7 +219,7 @@ class TCRsampler():
     v_occur = v_occur.assign(occur = np.divide(v_occur.occur, v_occur.occur.sum()))
     assert np.isclose(vj_occur.occur.sum(), 1.0, rtol = 0.000001)
     self.v_occur_freq = {v:f for v,f in v_occur.to_dict('split')['data']}
-      # TEST THAT np.isclose(np.sum([k for _,k in t.v_occur_freq.items()]), 1.0)
+
     # Calculate the marginal J-gene frequencies
     j_occur = df_gb_sub.head(N).groupby(['j_reps']).\
       size().\
@@ -228,7 +228,7 @@ class TCRsampler():
     j_occur = j_occur.assign(occur = np.divide(j_occur.occur, j_occur.occur.sum()))
     assert np.isclose(j_occur.occur.sum(), 1.0, rtol = 0.000001)
     self.j_occur_freq = {j:f for j,f in j_occur.to_dict('split')['data']}
-      # TEST THAT np.isclose(np.sum([k for _,k in t.j_occur_freq.items()]), 1.0)
+
     bar.next();bar.finish()
 
 
