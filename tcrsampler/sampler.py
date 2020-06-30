@@ -13,9 +13,10 @@ class TCRsampler():
 
   Attributes
   ----------
+  use_default : bool
+    if True, TCRsampler instance automatically builds background using beta chain data from Britanova et al. 2016. (see notes)
   ref_df : pd.DataFrame
     Dataframe of reference CDR$, but contain columns ['v_reps','j_reps','cdr3', 'count','freq']
-
   ref_dict : dict
     dictionary keyed on tuples that point to dataframe of CDR3s
 
@@ -53,10 +54,27 @@ class TCRsampler():
   (i.e., the subject with the fewest clones). In this case the ~102,000 clones are considered 
   from each sample. 
 
+  Notes:
+  Default data from Britanova OV, Shugay M, Merzlyak EM, Staroverov DB, Putintseva EV, Turchaninova MA, Mamedov IZ, Pogorelyy MV, Bolotin DA, Izraelson M, et al. Dynamics of individual T cell repertoires: from cord blood to centenarians. J Immunol. 2016;196:5005–5013. doi: 10.4049/jimmunol.1600005.
+
   """
-  def __init__(self):
+  def __init__(self, use_default = False):
+    self.default_bkgd = 'britanova_chord_blood.csv'
     self.ref_df = None
     self.ref_dict = None
+
+    if use_default:
+      path_to_db = os.path.join(os.path.dirname(os.path.realpath(__file__)),'db')
+      path_to_db_bkgd = os.path.join(path_to_db, self.default_bkgd)
+      if not os.path.isfile(path_to_db_bkgd):
+        raise OSError(f'{path_to_db_bkgd} default file not found. Download a default background using python -c "from tcrsampler.setup_db import install_all_next_gen; install_all_next_gen(dry_run = False)"')
+      else:
+        bar = IncrementalBar(f'Loading {self.default_bkgd}', max = 2, suffix='%(percent)d%%')
+        bar.next()
+        self.ref_df= pd.read_csv(path_to_db_bkgd)
+        bar.next()
+        bar.finish()
+        self.build_background()
 
   def _valid_cdr3(self, cdr3):
     """

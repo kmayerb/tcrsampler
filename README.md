@@ -29,3 +29,9 @@ t.sample([['TRBV9*01','TRBJ2-7*01', 2],['TRBV7-7*01', 'TRBJ2-4*01', 4] ], depth 
 [['CASSRTGSLADEQYF', 'CASSATGVVSAQYF'],
  ['CASSLGQAARGIQYF', 'CASSLGQAARGIQYF', 'CASSLGQAARGIQYF', 'CASSLGQAARGIQYF']]
 ```
+
+## Download Default Background
+
+```python
+python -c "from tcrsampler.setup_db import install_all_next_gen; install_all_next_gen(dry_run = False)"
+```

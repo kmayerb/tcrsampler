@@ -7,6 +7,13 @@ import numpy as np
 def test_TCRsampler_init():
 	t = TCRsampler()
 
+def test_TCRsampler_init_default():
+	t = TCRsampler(use_default=True)
+	assert t.default_bkgd == 'britanova_chord_blood.csv'
+	assert isinstance(t.ref_df, pd.DataFrame)
+	assert isinstance(t.ref_dict, dict)
+	assert 'TRBV2*01' in t.v_freq.keys()
+
 def test_TCRsampler_clean_mixcr():
 	t = TCRsampler()
 	fn= os.path.join('tcrsampler' ,'tests', 'pmbc_mixcr_example_data.txt')
