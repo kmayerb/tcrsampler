@@ -29,6 +29,8 @@ def install_nextgen_data_to_db(download_file, download_from = "dropbox", dry_run
     if download_from is "dropbox":
         address = { "britanova_chord_blood.csv" : 'https://www.dropbox.com/s/rkbce72njcei4y8/britanova_chord_blood.csv?dl=1',
                     "emerson_cmv_negative.csv"  : 'https://www.dropbox.com/s/yrozbowxtqumjfl/emerson_cmv_negative.csv?dl=1',
+                    "ruggiero_mus_tcr_beta.tsv"  :'https://www.dropbox.com/s/zqb1k31v0btwgat/ruggiero_mus_tcr_beta.txt?dl=1',
+                    "ruggiero_mus_tcr_alpha.tsv" :'https://www.dropbox.com/s/20ngxkgkw8ig618/ruggiero_mus_tcr_alpha.txt?dl=1',
                     "new_nextgen_chains_mouse_A.tsv" : 'https://www.dropbox.com/s/pkpr6p97eworn3q/new_nextgen_chains_mouse_A.tsv?dl=1',
                     "new_nextgen_chains_mouse_B.tsv" : 'https://www.dropbox.com/s/sxgvrj25mnzr20s/new_nextgen_chains_mouse_B.tsv?dl=1',
                     "new_nextgen_chains_human_A.tsv" : 'https://www.dropbox.com/s/9p43c7tscf46dat/new_nextgen_chains_human_A.tsv?dl=1',
@@ -64,7 +66,7 @@ def install_all_next_gen(dry_run = False):
                 "new_nextgen_chains_human_D.tsv",
                 "britanova_chord_blood.csv",
                 "emerson_cmv_negative.csv" ]
-    select_files = ["britanova_chord_blood.csv","emerson_cmv_negative.csv" ]
+    select_files = ["britanova_chord_blood.csv","emerson_cmv_negative.csv", "ruggiero_mus_tcr_beta.tsv", "ruggiero_mus_tcr_alpha.tsv" ]
 
     for fn in select_files:
         install_nextgen_data_to_db(download_file = fn, download_from = 'dropbox', dry_run = dry_run )
