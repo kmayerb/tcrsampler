@@ -148,7 +148,7 @@ class TCRsampler():
     for file in select_files:
       sys.stdout.write(f"\t{file}\n") 
       sys.stdout.write(f"Download file {file} with TCRsampler.download_background_file(download_file = '{file}')\n")
-      sys.stdout.write(f"\nDownload all background files with TCRsampler.download_all_background_files()")
+      sys.stdout.write(f"\nDownload all background files with TCRsampler.download_all_background_files()\n")
     return select_files
 
 
