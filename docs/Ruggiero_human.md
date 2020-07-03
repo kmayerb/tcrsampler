@@ -73,7 +73,7 @@ for i,row in selections_url.iterrows():
 
 ## Convert SRA to fastq
 
-```
+```python
 import os 
 
 path_to_fastq_dump = '/Users/kmayerbl/sratoolkit.2.9.6-1-mac64/bin/fastq-dump'
@@ -125,4 +125,47 @@ process mix {
 	"""
 }
 ```
+
+### Combine Alpha and Beta Chain Samples 
+
+```python
+import os 
+import pandas as pd
+
+path_to_mixcr_outputs = '/Volumes/Samsung_T5/kmayerbl/tcr_data/ruggiero/SRA/output_alpha'
+files = [f for f in os.listdir(path_to_mixcr_outputs) if f.endswith(".txt")]
+
+dfs = list()
+for f in files:
+ 	df = pd.read_csv(os.path.join(path_to_mixcr_outputs,f), sep = "\t")
+ 	df['subject'] = f.replace(".fastq.clns.best.txt","")
+ 	dfs.append(df.copy())
+
+df_combined = pd.concat(dfs).reset_index(drop = True)
+print(df_combined.sample(10))
+
+from tcrsampler.sampler import TCRsampler
+t = TCRsampler()
+t.clean_mixcr(df = df_combined)
+t.ref_df.to_csv('/Volumes/Samsung_T5/kmayerbl/tcr_data/ruggiero/SRA/output_alpha/ruggiero_human_alpha_t.tsv.sampler.tsv', sep = "\t", index = False)
+
+
+path_to_mixcr_outputs = '/Volumes/Samsung_T5/kmayerbl/tcr_data/ruggiero/SRA/output_beta'
+files = [f for f in os.listdir(path_to_mixcr_outputs) if f.endswith(".txt")]
+
+dfs = list()
+for f in files:
+ 	df = pd.read_csv(os.path.join(path_to_mixcr_outputs,f), sep = "\t")
+ 	df['subject'] = f.replace(".fastq.clns.best.txt","")
+ 	dfs.append(df.copy())
+
+df_combined = pd.concat(dfs).reset_index(drop = True)
+print(df_combined.sample(10))
+
+from tcrsampler.sampler import TCRsampler
+t = TCRsampler()
+t.clean_mixcr(df = df_combined)
+t.ref_df.to_csv('/Volumes/Samsung_T5/kmayerbl/tcr_data/ruggiero/SRA/output_beta/ruggiero_human_beta_t.tsv.sampler.tsv', sep = "\t", index = False)
+```
+
 
