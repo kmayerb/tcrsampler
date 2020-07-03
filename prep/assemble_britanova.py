@@ -62,3 +62,4 @@ def assemble_britanova_chord_blood(
 if __name__ == '__main__':
 	df = assemble_britanova_chord_blood()
 	df.to_csv("britanova_chord_blood.csv")
+	df[['v_reps', 'j_reps', 'cdr3', 'count', 'freq', 'subject']].to_csv("britanova_human_beta_t_cb.tsv.sampler.tsv", sep = "\t", index = False)

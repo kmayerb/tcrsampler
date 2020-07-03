@@ -6,6 +6,9 @@ import warnings
 import random 
 import time
 from progress.bar import IncrementalBar
+from tcrsampler.setup_db import install_all_next_gen, install_nextgen_data_to_db, select_files
+
+__all__ = ['TCRsampler']
 
 class TCRsampler():
   """ 
@@ -13,8 +16,8 @@ class TCRsampler():
 
   Attributes
   ----------
-  use_default : bool
-    if True, TCRsampler instance automatically builds background using beta chain data from Britanova et al. 2016. (see notes)
+  default_background: str or None
+    string name of background file, expected in db/ directory of package source if setup_db step are run.
   ref_df : pd.DataFrame
     Dataframe of reference CDR$, but contain columns ['v_reps','j_reps','cdr3', 'count','freq']
   ref_dict : dict
@@ -58,12 +61,12 @@ class TCRsampler():
   Default data from Britanova OV, Shugay M, Merzlyak EM, Staroverov DB, Putintseva EV, Turchaninova MA, Mamedov IZ, Pogorelyy MV, Bolotin DA, Izraelson M, et al. Dynamics of individual T cell repertoires: from cord blood to centenarians. J Immunol. 2016;196:5005–5013. doi: 10.4049/jimmunol.1600005.
 
   """
-  def __init__(self, use_default = False):
-    self.default_bkgd = 'britanova_chord_blood.csv'
+  def __init__(self, default_background = None):
+    self.default_bkgd = default_background
     self.ref_df = None
     self.ref_dict = None
 
-    if use_default:
+    if default_background is not None:
       path_to_db = os.path.join(os.path.dirname(os.path.realpath(__file__)),'db')
       path_to_db_bkgd = os.path.join(path_to_db, self.default_bkgd)
       if not os.path.isfile(path_to_db_bkgd):
@@ -71,10 +74,83 @@ class TCRsampler():
       else:
         bar = IncrementalBar(f'Loading {self.default_bkgd}', max = 2, suffix='%(percent)d%%')
         bar.next()
-        self.ref_df= pd.read_csv(path_to_db_bkgd)
+        if path_to_db_bkgd.endswith(".csv"):
+          sep = ","
+        elif path_to_db_bkgd.endswith(".tsv"):
+          sep = "\t"
+        self.ref_df= pd.read_csv(path_to_db_bkgd, sep = sep)
         bar.next()
         bar.finish()
         self.build_background()
+  
+  @classmethod
+  def currently_available_backgrounds(self):
+    """ 
+    List available default background already in the /db/ folder.
+
+    These file are immediately available for use as TCRsampler(default_background = 'file')
+
+    Returns
+    -------
+    available_tsv_and_csv : list
+    """
+    path_to_db = os.path.join(os.path.dirname(os.path.realpath(__file__)),'db')
+    available_tsv_and_csv = [f for f in os.listdir(path_to_db) if f.endswith('sv') and f not in ['alphabeta_db.tsv', 'gammadelta_db.tsv']]
+    for filename in sorted(available_tsv_and_csv):
+      sys.stdout.write(f"{filename}\n")
+    available_tsv_and_csv =  sorted(available_tsv_and_csv)
+    return available_tsv_and_csv
+
+  @classmethod
+  def download_all_background_files(self, dry_run = False):
+    """
+    Downloads, unzips, and installs all the priority default background files to package source tcrsampler/db/ folder. 
+
+    Parameters
+    ----------
+    dry_run : bool 
+      If True, only prints curl strings 
+
+    Notes
+    -----
+    This function will only work on OSX/Linus systems.
+    """
+    install_all_next_gen(dry_run = dry_run)
+  
+  @classmethod
+  def download_background_file(self, download_file, dry_run = False, download_from = "dropbox"):
+    """
+    Downloads, unzips, and installs a specific background files. 
+
+    Parameters
+    ----------
+    download_file : str
+      string of file to download (e.g. "britanova_human_beta_t_cb.tsv.sampler.tsv.zip", "emerson_human_beta_t_cmvneg.tsv.sampler.tsv.zip" , 
+      "wiraninha_sampler.zip", "ruggiero_mouse_sampler.zip" , "ruggiero_human_sampler.zip" )
+    dry_run : bool 
+      If True, only prints curl strings 
+
+    Notes
+    -----
+    Downloads, unzips, and installs file directly to package source tcrsampler/db/ folder. 
+
+    These .zip file contain multiple backgound files. 
+
+    This function will only work on OSX/Linus systems
+    """
+    install_nextgen_data_to_db(download_file = download_file, download_from = download_from, dry_run = dry_run)
+
+  @classmethod
+  def get_download_address(self):
+  """
+  Provides list of availble .zip files that can be downloaded individually. 
+  """
+    for file in select_files:
+      sys.stdout.write(f"\t{file}\n") 
+      sys.stdout.write(f"Download file {file} with TCRsampler.download_background_file(download_file = '{file}')\n")
+      sys.stdout.write(f"\nDownload all background files with TCRsampler.download_all_background_files()")
+    return select_files
+
 
   def _valid_cdr3(self, cdr3):
     """
@@ -100,7 +176,7 @@ class TCRsampler():
     valid = np.all([aa in amino_acids for aa in cdr3])
     return valid
 
-  def clean_mixcr(self, filename):
+  def clean_mixcr(self, filename = None, df = None):
     """
     Parameters
     ----------
@@ -112,9 +188,10 @@ class TCRsampler():
     self.ref_df : pd.DataFrame  
       DataFarme with columns ['v_reps','j_reps','cdr3', 'count']
     """
-
+    if df is None:
+      df = pd.read_csv(filename, sep = "\t")
+    
     bar = IncrementalBar('Clean Mixcr     ', max = 1, suffix='%(percent)d%%')
-    df = pd.read_csv(filename, sep = "\t")
     
     if 'subject' in df.columns:
       select_these_columns = ['bestVGene','bestJGene', 'aaSeqCDR3','cloneCount', 'cloneFraction','subject']

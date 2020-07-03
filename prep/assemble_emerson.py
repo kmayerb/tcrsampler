@@ -103,6 +103,7 @@ def assemble_emerson_cmv_negative(
 df = assemble_emerson_cmv_negative()
 bar = IncrementalBar('Write .to_csv.    ', max = 2, suffix='%(percent)d%%')
 bar.next()
-df.to_csv("emerson_cmv_negative.csv", index = False)
+#df.to_csv("emerson_cmv_negative.csv", index = False)
+df[['v_reps', 'j_reps', 'cdr3', 'count', 'freq', 'subject']].to_csv("emerson_human_beta_t_cmvneg.tsv", sep = "\t", index = False)
 bar.next();bar.finish()
 

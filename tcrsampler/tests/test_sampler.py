@@ -8,8 +8,8 @@ def test_TCRsampler_init():
 	t = TCRsampler()
 
 def test_TCRsampler_init_default():
-	t = TCRsampler(use_default=True)
-	assert t.default_bkgd == 'britanova_chord_blood.csv'
+	t = TCRsampler(default_background = 'britanova_human_beta_t_cb.tsv.sampler.tsv')
+	assert t.default_bkgd == 'britanova_human_beta_t_cb.tsv.sampler.tsv'
 	assert isinstance(t.ref_df, pd.DataFrame)
 	assert isinstance(t.ref_dict, dict)
 	assert 'TRBV2*01' in t.v_freq.keys()
@@ -110,6 +110,30 @@ def test_v_j_freq_estimates():
 	assert t.j_occur_freq == {'TRBJ2-1*01': 0.2, 'TRBJ2-3*01': 0.4, 'TRBJ2-5*01': 0.4}
 
 								
+def test_classmethod_calls():
+	import tcrsampler as ts
+	ts.TCRsampler.currently_available_backgrounds()
+	ts.TCRsampler.download_all_background_files(dry_run = True)
+	ts.TCRsampler.download_background_file(download_file = 'wiraninha_sampler.zip', dry_run = True, download_from = "dropbox")
+	ts.TCRsampler.get_download_address()
+
+def test_currently_available_backgrounds():
+	import tcrsampler as ts
+	r = ts.TCRsampler.currently_available_backgrounds()
+	assert isinstance(r, list)
+
+def test_get_download_address():
+	import tcrsampler as ts
+	r = ts.TCRsampler.get_download_address()
+	assert isinstance(r, list)
+
+	select_files = ["wiraninha_sampler.zip", 
+	                "ruggiero_mouse_sampler.zip", 
+	                "ruggiero_human_sampler.zip",
+	                "emerson_human_beta_t_cmvneg.tsv.sampler.tsv.zip",
+	                "britanova_human_beta_t_cb.tsv.sampler.tsv.zip"]
+	for sf in select_files:
+		assert sf in r
 
 
 
