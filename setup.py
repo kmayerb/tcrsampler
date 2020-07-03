@@ -17,7 +17,7 @@ opts = dict(name='tcrsampler',
             license='MIT',
             author='Koshlan Mayer-Blackwell',
             author_email='kmayerbl@fredhutch.org',
-            version='0.1.6',
+            version='0.1.7',
             packages=PACKAGES,
             include_package_data=True)
 
