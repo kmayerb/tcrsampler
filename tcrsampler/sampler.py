@@ -142,9 +142,9 @@ class TCRsampler():
 
   @classmethod
   def get_download_address(self):
-  """
-  Provides list of availble .zip files that can be downloaded individually. 
-  """
+    """
+    Provides list of availble .zip files that can be downloaded individually. 
+    """
     for file in select_files:
       sys.stdout.write(f"\t{file}\n") 
       sys.stdout.write(f"Download file {file} with TCRsampler.download_background_file(download_file = '{file}')\n")
