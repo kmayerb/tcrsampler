@@ -14,7 +14,7 @@ While the number of background files is relatively small. The easist way to get 
 python -c "from tcrsampler.setup_db import install_all_next_gen; install_all_next_gen(dry_run = False)"
 ```
 
-## Download Backgrounds As Beeded
+## Download Backgrounds As Needed
 
 However, in the future, we envision that some users may wish to extert more control over which background files are installed or choose to install a 
 background file ants needed in an ieractive session. 
