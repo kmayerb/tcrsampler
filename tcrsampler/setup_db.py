@@ -3,7 +3,8 @@ import sys
 __all__ = ['install_nextgen_data_to_db']
 
 
-select_files = ["wiraninha_sampler.zip", 
+select_files = ["wiraninha_sampler.zip",
+                "olga_sampler.zip", 
                 "ruggiero_mouse_sampler.zip", 
                 "ruggiero_human_sampler.zip",
                 "emerson_human_beta_t_cmvneg.tsv.sampler.tsv.zip",
@@ -11,6 +12,7 @@ select_files = ["wiraninha_sampler.zip",
 
 
 address = { "wiraninha_sampler.zip"                           : "https://www.dropbox.com/s/ily0td3tn1uc7bi/wiraninha_sampler.zip?dl=1",          
+            "olga_sampler.zip"                                : "https://www.dropbox.com/s/qlsxvst8bn04l0n/olga_sampler.zip?dl=1",
             "ruggiero_mouse_sampler.zip"                      : "https://www.dropbox.com/s/yz8v1c1gf2eyzxk/ruggiero_mouse_sampler.zip?dl=1",
             "ruggiero_human_sampler.zip"                      : "https://www.dropbox.com/s/jda6qtemk65zlfk/ruggiero_human_sampler.zip?dl=1",
             "britanova_human_beta_t_cb.tsv.sampler.tsv.zip"   : "https://www.dropbox.com/s/87n5v2by80xhy1q/britanova_human_beta_t_cb.tsv.sampler.tsv.zip?dl=1",
