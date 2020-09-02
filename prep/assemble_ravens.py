@@ -158,6 +158,6 @@ print([x for x in tsg.j_freq.keys()])
 print([x for x in tsg.j_freq.keys() if x not in ref.all_genes['human'].keys()])
 assert len([x for x in tsg.j_freq.keys() if x not in ref.all_genes['human'].keys()]) == 0
 
-dfd[['v_reps','j_reps','cdr3','count','freq','subject']].to_csv("ravens_human_delta_t.sampler.tsv",index = False)
-dfg[['v_reps','j_reps','cdr3','count','freq','subject']].to_csv("ravens_human_gamma_t.sampler.tsv",index = False)
+dfd[['v_reps','j_reps','cdr3','count','freq','subject']].to_csv("ravens_human_delta_t.sampler.tsv",index = False, sep = "\t")
+dfg[['v_reps','j_reps','cdr3','count','freq','subject']].to_csv("ravens_human_gamma_t.sampler.tsv",index = False, sep = "\t")
 
