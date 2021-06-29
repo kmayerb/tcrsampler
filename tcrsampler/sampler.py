@@ -364,7 +364,8 @@ class TCRsampler():
 
     self.ref_dict = d
 
-  def sample_background(self,v,j,n=1, d= None, depth = 1, seed =1, use_frequency= True ):
+  def sample_background(self, v, j, n=1, d=None, depth=1, seed=1, use_frequency=True,
+                        return_df=False, return_df_cols=['v_reps', 'j_reps', 'cdr3', 'subject']):
     """
     Parameters
     ----------
@@ -374,32 +375,38 @@ class TCRsampler():
       j-gene name e.g., 'TRBJ1-1*01'
     n : int
       number of cdr3 samples to draw for given v,j
-    d : dict 
+    d : dict
       Dictionary for sampling, generated in by .build_background
-    depth : 
+    depth :
 
     seed : int
       random number generating seed
     use_frequency : bool
-      If True, uses frequency for sampling proportionaly. If False, uses raw counts. 
+      If True, uses frequency for sampling proportionaly. If False, uses raw counts.
+    return_df : bool
+      If True, returns a pandas dataframe (containing columns indicated in return_df_cols).
+      If false, returns a list of cdr3 samples.
+    return_df_cols : list
+      List of columns to be included in the returned dataframe,
+      from the background dataframe (only if return_df=True).
+      Options are: ['v_reps', 'j_reps', 'cdr3', 'subject', 'count', 'freq']
 
     Returns
     -------
-    r: list
+    r: list or pd.Dataframe
 
-    Example 
+    Example
     -------
     >>> sample_background(v ='TRBV10-1*01', j ='TRBJ1-1*01',n=1, d= None, depth = 1, seed =1, use_frequency= True )
     """
     if d is None:
       d = self.ref_dict
 
-
     if use_frequency:
       col = 'freq'
     else:
       col = 'count'
-    
+
     assert isinstance(v, str)
     assert isinstance(j, str)
     assert isinstance(d, dict)
@@ -407,24 +414,31 @@ class TCRsampler():
     assert isinstance(seed, int)
 
     try:
-      subdf = d[(v,j)]
-  
+      subdf = d[(v, j)]
+
       selection_probability = \
-        subdf[ col ] / np.sum(subdf[ col ])
+        subdf[col] / np.sum(subdf[col])
 
-      np.random.seed(seed) 
-      
+      np.random.seed(seed)
+
       probabalistic_selection_index = \
-        np.random.choice( range(subdf.shape[0]),
-        size = n * depth,
-        p=selection_probability)
+        np.random.choice(range(subdf.shape[0]),
+                         size=n * depth,
+                         p=selection_probability)
 
-      r = subdf.iloc[probabalistic_selection_index,]['cdr3'].to_list()
+      if return_df:
+        r = subdf.iloc[probabalistic_selection_index,][return_df_cols]
+      else:
+        r = subdf.iloc[probabalistic_selection_index,]['cdr3'].to_list()
+
       return r
 
     except KeyError:
       warnings.warn(f"({v},{j} gene usage not available")
-      r = [None]
+      if return_df:
+        r = pd.DataFrame(columns=return_df_cols)
+      else:
+        r = [None]
       return r
 
 
